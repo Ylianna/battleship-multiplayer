@@ -23,4 +23,7 @@ export interface Room {
     shipsConfig: { type: string; size: number; count: number }[];
     gameState: 'waiting' | 'placement' | 'playing' | 'finished';
     turn: string | null;
+    history: {
+        [playerId: string]: { x: number; y: number; result: 'hit' | 'miss' }[]
+    };
 }

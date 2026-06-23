@@ -118,27 +118,36 @@ io.on('connection', (socket: Socket) => {
 
     socket.on('make_move', (data: { roomId: string; x: number; y: number }) => {
         const room = rooms.get(data.roomId);
-        if (!room || room.gameState !== 'playing' || room.turn !== socket.id) return;
+        if (!room) {
+            return;
+        }
+
+        if (room.gameState !== 'playing' || room.turn !== socket.id) {
+            return;
+        }
 
         const targetId = socket.id === room.creator.id ? room.opponent!.id : room.creator.id;
-        const targetBoard = room.boards[targetId];
 
+        if (!room.history[targetId]) room.history[targetId] = [];
+
+        const alreadyShot = room.history[targetId].some((h: any) => h.x === data.x && h.y === data.y);
+        if (alreadyShot) {
+            return;
+        }
+        const targetBoard = room.boards[targetId];
         let hit = false;
-        let shipSunk = false;
 
         for (const ship of targetBoard) {
             const part = ship.coordinates.find((c: any) => c.x === data.x && c.y === data.y);
             if (part) {
                 part.hit = true;
                 hit = true;
-                shipSunk = ship.coordinates.every((c: any) => c.hit);
                 break;
             }
         }
 
         const moveResult = hit ? 'hit' : 'miss';
         room.history[targetId].push({ x: data.x, y: data.y, result: moveResult });
-
         const allSunk = targetBoard.every((ship: any) => ship.coordinates.every((c: any) => c.hit));
 
         if (allSunk) {

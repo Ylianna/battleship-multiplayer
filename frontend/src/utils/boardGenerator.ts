@@ -1,4 +1,4 @@
-import type {Ship} from '../types/game';
+import type {Ship, ShipCoordinate} from '../types/game';
 
 export const generateAutoBoard = (size: number): Ship[] => {
     const config = [
@@ -12,8 +12,7 @@ export const generateAutoBoard = (size: number): Ship[] => {
             const isHorizontal = Math.random() > 0.5;
             const x = Math.floor(Math.random() * (isHorizontal ? size - ship.size : size));
             const y = Math.floor(Math.random() * (isHorizontal ? size : size - ship.size));
-
-            const coords: { x: number; y: number; hit: boolean; }[] = [];
+            const coords: ShipCoordinate[] = [];
             for (let i = 0; i < ship.size; i++) {
                 coords.push({
                     x: isHorizontal ? x + i : x,

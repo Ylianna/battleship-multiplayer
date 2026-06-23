@@ -94,8 +94,8 @@ export function App() {
           </div>
           <div>
             {activeRoom.gameState === 'playing' && (
-                <div className={`px-4 py-2 rounded-xl font-bold text-sm border ${activeRoom.turn === user.id ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'}`}>
-                  {activeRoom.turn === user.id ? 'Your Strategic Volley' : 'Opponent Calculating Move'}
+                <div className={`px-4 py-2 rounded-xl font-bold text-sm border ${activeRoom.turn === socket.id ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'}`}>
+                  {activeRoom.turn === socket.id ? 'Your Strategic Volley' : 'Opponent Calculating Move'}
                 </div>
             )}
           </div>
@@ -117,7 +117,12 @@ export function App() {
         )}
 
         {activeRoom.gameState === 'playing' && (
-            <GameBoard activeRoom={activeRoom} myBoard={myBoard} onMakeMove={makeMove} />
+            <GameBoard
+                activeRoom={activeRoom}
+                myBoard={myBoard}
+                onMakeMove={makeMove}
+                userId={socket.id || ''}
+            />
         )}
 
         {winner && (
