@@ -15,7 +15,6 @@ interface GameBoardProps {
 
 export function GameBoard({ activeRoom, myBoard, onMakeMove, userId }: GameBoardProps) {
     const isCreator = activeRoom.creator.id === userId;
-
     const myId = userId;
     const opponentId = isCreator ? activeRoom.opponent?.id : activeRoom.creator.id;
 
@@ -23,38 +22,32 @@ export function GameBoard({ activeRoom, myBoard, onMakeMove, userId }: GameBoard
     const shotsOnMe: ShotRecord[] = myId ? (activeRoom.history?.[myId] || []) : [];
 
     const handleCellClick = (x: number, y: number, shot: ShotRecord | null) => {
-        if (shot) {
-            return;
-        }
-        if (activeRoom.turn !== userId) {
-            return;
-        }
+        if (shot || activeRoom.turn !== userId) return;
         onMakeMove(x, y);
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl select-none">
             <div className="flex flex-col items-center">
-                <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">Strategic Target Field</h4>
+                <h4 className="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wider">Strategic Target Field</h4>
                 <div
-                    className="grid gap-1 bg-slate-900 p-3 rounded-2xl border border-slate-800"
+                    className="grid gap-px bg-slate-800 p-1 rounded-xl border border-slate-700 shadow-2xl"
                     style={{ gridTemplateColumns: `repeat(${activeRoom.gridSize}, minmax(0, 1fr))` }}
                 >
                     {Array.from({ length: activeRoom.gridSize * activeRoom.gridSize }).map((_, index) => {
                         const x = index % activeRoom.gridSize;
                         const y = Math.floor(index / activeRoom.gridSize);
-
                         const shot = shotsOnOpponent.find((h: ShotRecord) => h.x === x && h.y === y) || null;
 
-                        let cellBg = 'bg-slate-950 hover:bg-indigo-900/30';
+                        let cellBg = 'bg-slate-900 hover:bg-indigo-950/40';
                         let cellContent = '';
 
                         if (shot) {
                             if (shot.result === 'hit') {
-                                cellBg = 'bg-rose-500/20 border-rose-500/50';
+                                cellBg = 'bg-rose-950/20 border border-rose-500/30';
                                 cellContent = '❌';
                             } else {
-                                cellBg = 'bg-slate-800/40';
+                                cellBg = 'bg-slate-950';
                                 cellContent = '•';
                             }
                         }
@@ -63,9 +56,9 @@ export function GameBoard({ activeRoom, myBoard, onMakeMove, userId }: GameBoard
                             <button
                                 key={index}
                                 onClick={() => handleCellClick(x, y, shot)}
-                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded border border-slate-800/80 flex items-center justify-center text-xs transition ${cellBg}`}
+                                className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-xs font-mono transition-all duration-150 border border-slate-800/40 ${cellBg}`}
                             >
-                <span className={shot?.result === 'hit' ? 'text-rose-500 font-bold' : 'text-slate-500 text-lg'}>
+                <span className={shot?.result === 'hit' ? 'text-rose-400 font-bold text-sm' : 'text-slate-600 text-lg font-black'}>
                   {cellContent}
                 </span>
                             </button>
@@ -73,46 +66,87 @@ export function GameBoard({ activeRoom, myBoard, onMakeMove, userId }: GameBoard
                     })}
                 </div>
             </div>
-
             <div className="flex flex-col items-center">
-                <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">Your Defenses</h4>
-                <div
-                    className="grid gap-1 bg-slate-900 p-3 rounded-2xl border border-slate-800"
-                    style={{ gridTemplateColumns: `repeat(${activeRoom.gridSize}, minmax(0, 1fr))` }}
-                >
-                    {Array.from({ length: activeRoom.gridSize * activeRoom.gridSize }).map((_, index) => {
-                        const x = index % activeRoom.gridSize;
-                        const y = Math.floor(index / activeRoom.gridSize);
+                <h4 className="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wider">Your Defenses</h4>
+                <div className="relative bg-slate-800 p-1 rounded-xl border border-slate-700 shadow-2xl">
+                    <div
+                        className="grid gap-px relative z-0"
+                        style={{ gridTemplateColumns: `repeat(${activeRoom.gridSize}, minmax(0, 1fr))` }}
+                    >
+                        {Array.from({ length: activeRoom.gridSize * activeRoom.gridSize }).map((_, index) => {
+                            const x = index % activeRoom.gridSize;
+                            const y = Math.floor(index / activeRoom.gridSize);
+                            const shotByOpponent = shotsOnMe.find((h: ShotRecord) => h.x === x && h.y === y);
 
-                        const hasShip = myBoard.some(s => s.coordinates.some((c) => c.x === x && c.y === y));
-                        const shotByOpponent = shotsOnMe.find((h: ShotRecord) => h.x === x && h.y === y);
+                            let cellBg = 'bg-slate-900';
+                            let cellContent = '';
 
-                        let cellBg = 'bg-slate-950';
-                        let cellContent = '';
-
-                        if (hasShip) {
-                            cellBg = 'bg-indigo-600/40 border-indigo-500/60';
-                        }
-
-                        if (shotByOpponent) {
-                            if (shotByOpponent.result === 'hit') {
-                                cellBg = 'bg-rose-600/30 border-rose-500';
-                                cellContent = '💥';
-                            } else {
-                                cellBg = 'bg-slate-800';
-                                cellContent = '•';
+                            if (shotByOpponent) {
+                                if (shotByOpponent.result === 'hit') {
+                                    cellBg = 'bg-rose-950/40 border border-rose-500/30';
+                                    cellContent = '💥';
+                                } else {
+                                    cellBg = 'bg-slate-950';
+                                    cellContent = '•';
+                                }
                             }
-                        }
 
-                        return (
-                            <div
-                                key={index}
-                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded border border-slate-800/80 flex items-center justify-center text-xs transition ${cellBg}`}
-                            >
-                                <span>{cellContent}</span>
-                            </div>
-                        );
-                    })}
+                            return (
+                                <div
+                                    key={index}
+                                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-xs border border-slate-800/40 text-slate-400 ${cellBg}`}
+                                >
+                                    <span className="text-sm select-none relative z-20">{cellContent}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div
+                        className="absolute inset-0 p-1 grid gap-px pointer-events-none z-10"
+                        style={{
+                            gridTemplateColumns: `repeat(${activeRoom.gridSize}, minmax(0, 1fr))`,
+                            gridTemplateRows: `repeat(${activeRoom.gridSize}, minmax(0, 1fr))`
+                        }}
+                    >
+                        {myBoard.map((ship) => {
+                            const coords = [...ship.coordinates].sort((a, b) => a.x !== b.x ? a.x - b.x : a.y - b.y);
+                            const firstCell = coords[0];
+                            const lastCell = coords[coords.length - 1];
+
+                            if (!firstCell || !lastCell) return null;
+
+                            const isHorizontal = firstCell.y === lastCell.y;
+                            const size = coords.length;
+
+                            const colStart = firstCell.x + 1;
+                            const rowStart = firstCell.y + 1;
+                            const colEnd = isHorizontal ? colStart + size : colStart + 1;
+                            const rowEnd = isHorizontal ? rowStart + 1 : rowStart + size;
+
+                            const suffix = isHorizontal ? 'h' : 'v';
+
+                            const imgStyle: React.CSSProperties = {
+                                gridColumn: `${colStart} / ${colEnd}`,
+                                gridRow: `${rowStart} / ${rowEnd}`,
+                                width: '100%',
+                                height: size === 1 ? '50%' : '100%',
+                                justifySelf: 'center',
+                                alignSelf: 'center',
+                                objectFit: size === 4 ? 'contain' : 'fill',
+                                objectPosition: 'center',
+                            };
+
+                            return (
+                                <img
+                                    key={ship.id}
+                                    src={`/assets/ship-${size}-${suffix}.png`}
+                                    alt="warship"
+                                    style={imgStyle}
+                                    className="p-0.5 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)]"
+                                />
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>
