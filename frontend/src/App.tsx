@@ -7,7 +7,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { LobbyScreen } from './components/LobbyScreen';
 import { GameBoard } from './components/GameBoard';
 
-const socket: Socket = io('http://localhost:5001');
+const socket: Socket = io('https://battleship-multiplayer-zg9p.onrender.com');
 
 const playSound = (type: 'miss' | 'hit') => {
   const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
